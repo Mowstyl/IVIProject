@@ -1,0 +1,161 @@
+/* Material.cpp
+*
+* Interaccion y Visualizacion de la Informacion.
+*
+* Practice 2.
+* Ray tracing.
+*
+* Jose Pascual Molina Masso.
+* Escuela Superior de Ingenieria Informatica de Albacete.
+*/
+
+
+#include "glm/glm.hpp" // glm::vec3, glm::dot
+
+#include "Material.h"
+#include "light.h"
+#include "lightlist.h"
+#include "world.h"
+#include "limits.h"
+
+
+/* Constructors */
+Material::Material(const glm::vec3 &diff) {
+
+	Ka = glm::vec3(0.0, 0.0, 0.0);
+	Kd = diff;
+	Kdt = glm::vec3(0.0, 0.0, 0.0);
+	Ks = glm::vec3(0.0, 0.0, 0.0);
+	Kst = glm::vec3(0.0, 0.0, 0.0);
+	n = 0;
+	Kr = glm::vec3(0.0, 0.0, 0.0);
+	Kt = glm::vec3(0.0, 0.0, 0.0);
+	ior = 0.0;
+}
+
+Material::Material(const glm::vec3 &amb, const glm::vec3 &diff, const glm::vec3 &diffTrans,
+	const glm::vec3 &spec, const glm::vec3 &specTrans, int shine, const glm::vec3 &emis,
+	const glm::vec3 &refl, const glm::vec3 &trans, float index) {
+
+	Ka = amb;
+	Kd = diff;
+	Ks = spec;
+	n = shine;
+	Kr = refl;
+	Kt = trans;
+	ior = index;
+}
+
+/* Implements the global illumination model */
+glm::vec3 Material::Shade(ShadingInfo &shadInfo)
+{
+	glm::vec3 color(0.0, 0.0, 0.0), V;
+	float VdotN, ratio = NULL;
+	bool isTrans;
+
+	V = -shadInfo.rayDir;
+	VdotN = glm::dot(V, shadInfo.normal);
+	isTrans = (Kt != glm::vec3(0.0, 0.0, 0.0));
+	if (VdotN < 0) {
+
+		// The viewer stares at an interior or back face of the object,
+		// we will only illuminate it if material is transparent
+		if (isTrans) {
+			shadInfo.normal = -shadInfo.normal;  // Reverse normal
+			VdotN = -VdotN;
+			ratio = 1.0 / ior;  // Assume ray always comes from vacuum
+		}
+		else
+			return color;
+	}
+
+	// To do ...
+
+	glm::vec3 Ia = glm::vec3(0., 0., 0.);
+	glm::vec3 Id = glm::vec3(0., 0., 0.);
+	glm::vec3 Is = glm::vec3(0., 0., 0.);
+	glm::vec3 Idt = glm::vec3(0., 0., 0.);
+	glm::vec3 Ist = glm::vec3(0., 0., 0.);
+
+	Light *clight = shadInfo.pWorld->lights.First();
+	while (clight != NULL) {
+		glm::vec3 L = glm::normalize(clight->position - shadInfo.point);
+
+		shadInfo.pWorld->numShadRays++;
+		glm::vec3 tr = shadInfo.pWorld->objects.GetOpacity(shadInfo.point, clight->position, L);
+
+		float LdotN = glm::dot(L, shadInfo.normal);
+
+		glm::vec3 R = glm::normalize(2 * LdotN*shadInfo.normal - L); // reflexion perfecta
+
+		Ia += tr * clight->Ia;
+		if (LdotN > 0) {
+			Id += tr * clight->Id * LdotN; 
+			Is += tr * clight->Is * pow(glm::dot(R, V), n);
+		}
+		else if (LdotN < 0 && isTrans) {
+			if (ratio == NULL) {
+				ratio = 1.0 / ior;
+			}
+
+			glm::vec3 T;
+			float cosangle = glm::dot(L, -shadInfo.normal);
+			float aux = 1 + ratio * ratio * (cosangle * cosangle - 1);
+			if (aux > 0) {
+				float ratiob = ratio * cosangle - sqrt(aux);
+
+				T = glm::normalize(ratio * L + ratiob * -shadInfo.normal);
+			}
+
+			Idt += tr * clight->Id * glm::dot(L, -shadInfo.normal);
+			Ist += tr * clight->Is * pow(glm::dot(T, V), n);
+		}
+
+		clight = shadInfo.pWorld->lights.Next();
+	}
+
+	color = Ka * (shadInfo.pWorld->Iga * Ia) + Kd * Id + Ks * Is + Kdt * Idt + Kst * Ist + Ie;
+
+	if (shadInfo.depth < shadInfo.pWorld->maxDepth)
+	{
+		if (Kr.x > 0. || Kr.y > 0. || Kr.z > 0.) // El objeto es especular
+		{
+			shadInfo.pWorld->numReflRays++;
+			glm::vec3 R = glm::normalize(2 * VdotN * shadInfo.normal - V);
+
+			color += shadInfo.pWorld->Trace(shadInfo.point, R, shadInfo.depth + 1) * Kr;
+		}
+
+		if (isTrans) // El objeto es translucido
+		{
+			shadInfo.pWorld->numRefrRays++;
+			if (ratio == NULL) {
+				ratio = 1.0 / ior;
+			}
+
+			glm::vec3 Snell;
+			float cosangle = glm::dot(V, shadInfo.normal);
+			float aux = 1 + ratio * ratio * (cosangle * cosangle - 1);
+			if (aux > 0) {
+				float ratiob = ratio * cosangle - sqrt(aux);
+
+				Snell = glm::normalize(ratio * V + ratiob * shadInfo.normal);
+			}
+
+			color += shadInfo.pWorld->Trace(shadInfo.point, Snell, shadInfo.depth + 1) * Kt;
+		}
+	}
+
+	if (color.x > 1.) {
+		color.x = 1.;
+	}
+	if (color.y > 1.) {
+		color.y = 1.;
+	}
+	if (color.z > 1.) {
+		color.z = 1.;
+	}
+
+	return color;
+}
+
