@@ -115,7 +115,7 @@ glm::vec3 Material::Shade(ShadingInfo &shadInfo)
 			Is += tr * clight->Is * pow(glm::dot(R, V), n);
 		}
 		else if (LdotN < 0 && isTrans) {
-			glm::vec3* pT = refractionRay(-L, -shadInfo.normal, glm::dot(L, -shadInfo.normal), ior);
+			glm::vec3* pT = refractionRay(-L, -shadInfo.normal, glm::dot(L, -shadInfo.normal), ratio);
 			if (pT != NULL) {
 				Ist += tr * clight->Is * pow(glm::dot(*pT, V), n);
 			}
