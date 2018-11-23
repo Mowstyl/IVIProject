@@ -53,7 +53,7 @@ Material::Material(const glm::vec3 &amb, const glm::vec3 &diff, const glm::vec3 
 
 glm::vec3* refractionRay(const glm::vec3& I, const glm::vec3& N, float _IdotN, float a) {
 	float aux = 1 + a * a * (_IdotN * _IdotN - 1);
-	if (aux > 0) {
+	if (aux >= 0) {
 		float b = a * _IdotN - sqrt(aux);
 		return &glm::normalize(a * I + b * N);
 	}
@@ -107,15 +107,15 @@ glm::vec3 Material::Shade(ShadingInfo &shadInfo)
 
 		float LdotN = glm::dot(L, shadInfo.normal);
 
-		glm::vec3 R = glm::normalize(2 * LdotN*shadInfo.normal - L); // reflexion perfecta
-
 		Ia += tr * clight->Ia;
 		if (LdotN > 0) {
-			Id += tr * clight->Id * LdotN; 
+			glm::vec3 R = glm::normalize(2 * LdotN*shadInfo.normal - L); // reflexion perfecta
+
+			Id += tr * clight->Id * LdotN;
 			Is += tr * clight->Is * pow(glm::dot(R, V), n);
 		}
 		else if (LdotN < 0 && isTrans) {
-			glm::vec3* pT = refractionRay(L, -shadInfo.normal, glm::dot(L, -shadInfo.normal), ior);
+			glm::vec3* pT = refractionRay(-L, -shadInfo.normal, glm::dot(L, -shadInfo.normal), ior);
 			if (pT != NULL) {
 				Ist += tr * clight->Is * pow(glm::dot(*pT, V), n);
 			}
