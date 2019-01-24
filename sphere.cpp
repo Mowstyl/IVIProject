@@ -25,6 +25,7 @@
 /* Constructor */
 Sphere::Sphere(const glm::vec3& Center, float Radius, Material *pMat) {
   center = Center;
+  absxyz = glm::vec3(Radius, Radius, Radius);
   radius = Radius;
   pMaterial = pMat;
   pMaterial->IncRefs();

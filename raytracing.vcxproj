@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bbtree.cpp" />
     <ClCompile Include="frame.cpp" />
     <ClCompile Include="material.cpp" />
     <ClCompile Include="matrices.cpp" />
@@ -94,6 +95,7 @@
     <Library Include="glew32.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bbtree.h" />
     <ClInclude Include="frame.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="lightlist.h" />

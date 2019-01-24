@@ -10,6 +10,7 @@
  */
 
 
+#include <iostream> 
 #include "objectlist.h"
 #include "limits.h"
 
@@ -68,4 +69,28 @@ glm::vec3 ObjectList::GetOpacity(const glm::vec3& pos1, const glm::vec3& pos2, c
 	}
 
 	return tr;
+}
+
+Object** ObjectList::AsArray() {
+	int len, i = 0;
+	Object **objectArray, *optr;
+	glm::vec3 nowmin, nowmax;
+
+	len = Length();
+	objectArray = (Object**)malloc(sizeof(Object*) * len);
+
+	optr = First();
+	while (optr != NULL) {
+		if (i < len) {
+			*(objectArray + i) = optr;
+		}
+		else {
+			std::cerr << "El método Length de ObjectList no funciona correctamente" << std::endl;
+			exit(-1);
+		}
+		i++;
+		optr = Next();
+	}
+
+	return objectArray;
 }

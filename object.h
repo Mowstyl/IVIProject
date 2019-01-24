@@ -38,6 +38,9 @@ public:
   virtual void Draw() = 0;
 
   Material *pMaterial;
+
+  glm::vec3 center;  // Center coordinates
+  glm::vec3 absxyz;  // BOUNDING BOXES FTW!!!
 };
 
 
@@ -57,9 +60,6 @@ public:
   virtual glm::vec3 Shade(ShadingInfo &shadInfo);
   virtual void Draw();
 
-private:
-
-  glm::vec3 center;  // Center coordinates
   float radius;      // Radius
 };
 

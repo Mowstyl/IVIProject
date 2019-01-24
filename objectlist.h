@@ -32,7 +32,8 @@ public:
 
 	/* Returns the product of the opacities of the objects found in the direction of the ray */
 	glm::vec3 GetOpacity(const glm::vec3& pos1, const glm::vec3& pos2, const glm::vec3& dir);
-};
 
+	Object** AsArray(); // Returns the list as an array (pointer form)
+};
 
 #endif  // !defined _OBJECTLIST_H_

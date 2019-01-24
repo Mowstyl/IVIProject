@@ -28,6 +28,7 @@ public:
 
   /* Functions */
   void Add(element e);  // Insert at the front of the list
+  void Append(List<element> l);  // Appends the given list to the end of this
   element First();      // Returns the first element
   element Next();       // Returns the next element
   int Length();         // Length of list  
@@ -71,6 +72,30 @@ inline void List<element>::Add(element e) {
   nptr->next = first;
   first = nptr;
   count++;
+}
+
+/* Appends the given list to the end of this */
+template <class element>
+inline void List<element>::Append(List<element> l) {
+	Node* fi, ne, nene;
+
+	fi = first;
+	ne = fi->next;
+
+	if (ne != NULL) {
+		while (ne != NULL) {
+			nene = ne->next;
+
+			if (nene == NULL) {
+				ne->next = l.first;
+				break;
+			}
+			ne = nene;
+		}
+	}
+	else {
+		fi->next = l.first;
+	}
 }
 
 /* Returns the first object */

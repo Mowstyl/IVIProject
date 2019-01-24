@@ -140,13 +140,13 @@ drawSpheres(void)
 {
   Object *optr;
 
-  if (raytracer.world.objects.Length() > 0) {
+  if (raytracer.world.objects.objects->Length() > 0) {
 
 	  /* Access and draw the objects in the list in sequence */
-	  optr = raytracer.world.objects.First();
+	  optr = raytracer.world.objects.objects->First();
 	  while (optr != NULL) {
 		  optr->Draw();
-		  optr = raytracer.world.objects.Next();
+		  optr = raytracer.world.objects.objects->Next();
 	  }
   }
 }
@@ -233,7 +233,7 @@ RayTracing(void)
 
   /* Print statistics */
   fprintf(stdout, "\n");
-  fprintf(stdout, "Number of objects: %d\n", raytracer.world.objects.Length());
+  fprintf(stdout, "Number of objects: %d\n", raytracer.world.objectlist.Length());
   fprintf(stdout, "Number of lights: %d\n", raytracer.world.lights.Length());
   fprintf(stdout, "Maximum depth: %d\n", raytracer.world.maxDepth);
   fprintf(stdout, "Number of primary rays: %d\n", raytracer.world.numPrimRays);
@@ -342,6 +342,13 @@ keyboard(unsigned char key, int x, int y)
   }
 }
 
+int generateTree()
+{
+	raytracer.world.objects = *(new BBTree(&raytracer.world.objectlist));
+
+	return raytracer.world.objects.GetMaxLevel();
+}
+
 //*******************************************************************
 
 void
@@ -362,6 +369,14 @@ main(int argc, char* argv[])
 		  std::cerr << "Error al cargar fichero NFF" << std::endl;
 		  exit(-1);
 	  }
+	  if (generateTree() == -1) {
+		  std::cerr << "Error al generar la jerarquia de bounding boxes" << std::endl;
+		  exit(-1);
+	  }
+  }
+  else {
+	  std::cerr << "No se ha especificado el fichero NFF a cargar" << std::endl;
+	  exit(-1);
   }
 
   /* Create a window for OpenGL rendering: selects the appropriate visual

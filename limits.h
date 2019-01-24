@@ -14,6 +14,7 @@
 
 #define TFAR 10000.0  // Infinity
 #define TMIN 0.1      // Threshold to avoid self-occlusion
+#define FLOATFIX 1.175494351e-38F // Moar things
 
 
 #endif  // !defined _LIMITS_H_

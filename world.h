@@ -16,6 +16,7 @@
 
 #include "objectlist.h"
 #include "lightlist.h"
+#include "bbtree.h"
 
 
 /***************/
@@ -39,7 +40,8 @@ public:
 	glm::vec3 bgcolor;  // Background color
 
 	/* Lists of 3D objects and lights */
-	ObjectList objects;
+	ObjectList objectlist;
+	BBTree objects;
 	LightList lights;
 
 	/* Viewpoint parameters */

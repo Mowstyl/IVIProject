@@ -137,7 +137,7 @@ int RayTracer::LoadFileNFF(const char *name)
 
 		filestr >> centerx >> centery >> centerz >> radius;
 		pSphere = new Sphere(glm::vec3(centerx, centery, centerz), radius, pMaterial);
-		world.objects.Add(pSphere);
+		world.objectlist.Add(pSphere);
         break;
       }
       case 'p':
