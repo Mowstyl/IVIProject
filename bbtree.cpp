@@ -21,88 +21,52 @@ the t value of the intersection point, otherwise returns NULL */
 Object* BBTree::NearestInt(const glm::vec3& pos, const glm::vec3& dir, float& tnear, float tmax) {
 
 	Object *aux, *nearObj = NULL;
-	float tl, tr, auxtnear;
+	float tl, tr, auxtnear = tmax;
 
-	tnear = 0.0f;
-	if (GetMaxLevel() > 1) {
-		tr = this->pRight->Intersects(pos, dir, tmax);
-		tl = this->pLeft->Intersects(pos, dir, tmax);
-		if (tr > TMIN && tr < tmax) {
-			if (tl > TMIN && tl < tmax) {
-				if (tr < tl) {
-					nearObj = this->pRight->NearestInt(pos, dir, tnear, tmax);
+	tnear = 0;
+	if (this->Intersects(pos, dir, tmax)) {
+		if (GetMaxLevel() > 1) {
+			nearObj = this->pRight->NearestInt(pos, dir, tr, tmax);
 
-					if (tnear >= tl) {
-						aux = this->pLeft->NearestInt(pos, dir, auxtnear, tnear);
+			if (tr > TMIN && tr < tmax)
+				auxtnear = tr;
 
-						if (auxtnear <= TMIN && auxtnear >= tmax && auxtnear < tnear) {
-							nearObj = aux;
-							tnear = auxtnear;
-						}
+			aux = this->pLeft->NearestInt(pos, dir, tl, auxtnear);
+
+			if (tr > TMIN && tr < tmax) {
+				if (tl > TMIN && tl < tmax) {
+					if (tr < tl) {
+						tnear = tr;
 					}
-					else if (tnear <= TMIN || tnear >= tmax) {
-						nearObj = this->pLeft->NearestInt(pos, dir, tnear, tmax);
-					}
-				}
-				else if (tl < tr) {
-					nearObj = this->pLeft->NearestInt(pos, dir, tnear, tmax);
-
-					if (tnear >= tr) {
-						aux = this->pRight->NearestInt(pos, dir, auxtnear, tnear);
-
-						if (auxtnear <= TMIN && auxtnear >= tmax && auxtnear < tnear) {
-							nearObj = aux;
-							tnear = auxtnear;
-						}
-					}
-					else if (tnear <= TMIN || tnear >= tmax) {
-						nearObj = this->pRight->NearestInt(pos, dir, tnear, tmax);
+					else {
+						tnear = tl;
+						nearObj = aux;
 					}
 				}
 				else {
-					aux = this->pLeft->NearestInt(pos, dir, tl, tmax);
-					nearObj = this->pRight->NearestInt(pos, dir, tr, tmax);
-
-					if (TMIN < tl && tl < tmax) {
-						if (TMIN < tr && tr < tmax) {
-							if (tl < tr) {
-								tnear = tl;
-								nearObj = aux;
-							}
-							else {
-								tnear = tr;
-							}
-						}
-						else {
-							tnear = tl;
-							nearObj = aux;
-						}
-					}
+					tnear = tr;
 				}
 			}
 			else {
-				nearObj = this->pRight->NearestInt(pos, dir, tnear, tmax);
+				if (tl > TMIN && tl < tmax) {
+					tnear = tl;
+					nearObj = aux;
+				}
+				else {
+					tnear = 0;
+					nearObj = NULL;
+				}
 			}
 		}
 		else {
-			if (tl > TMIN && tl < tmax) {
-				nearObj = this->pLeft->NearestInt(pos, dir, tnear, tmax);
+			tnear = this->pElement->NearestInt(pos, dir);
+			if (TMIN < tnear && tnear < tmax) {  // Beware of self-occlusion
+				nearObj = this->pElement;
 			}
-		}
-
-		if (nearObj == NULL || tnear <= TMIN || tnear >= tmax) {
-			tnear = 0;
-			nearObj = NULL;
-		}
-	}
-	else {
-		tnear = this->pElement->NearestInt(pos, dir);
-		if (TMIN < tnear && tnear < tmax) {  // Beware of self-occlusion
-			nearObj = this->pElement;
-		}
-		else {
-			tnear = 0;
-			nearObj = NULL;
+			else {
+				tnear = 0;
+				nearObj = NULL;
+			}
 		}
 	}
 
@@ -111,95 +75,48 @@ Object* BBTree::NearestInt(const glm::vec3& pos, const glm::vec3& dir, float& tn
 
 /* Returns the product of the opacities of the objects found in the direction of the ray */
 glm::vec3 BBTree::GetOpacity(const glm::vec3& pos1, const glm::vec3& pos2, const glm::vec3& dir) {
-
 	Object *optr;
-	glm::vec3 tr = glm::vec3(1., 1., 1.);
+	glm::vec3 tr = glm::vec3(1.0f, 1.0f, 1.0f);
 
-	if (this->GetMaxLevel() > 1) {
-		if (this->Intersects(pos1, dir, TFAR) > TMIN && this->Intersects(pos2, -dir, TFAR) > TMIN) {
+	if (this->Intersects(pos1, dir, TFAR) && this->Intersects(pos2, -dir, TFAR)) {
+		if (this->GetMaxLevel() > 1) {
 			tr = this->GetLeft()->GetOpacity(pos1, pos2, dir) * this->GetRight()->GetOpacity(pos1, pos2, dir);
 		}
-	}
-	else {
-		optr = this->GetElement();
+		else {
+			optr = this->GetElement();
 
-		if (optr->NearestInt(pos1, dir) > TMIN && optr->NearestInt(pos2, -dir) > TMIN)
-		{
-			tr = optr->pMaterial->Kt;
+			if (optr->NearestInt(pos1, dir) > TMIN && optr->NearestInt(pos2, -dir) > TMIN)
+			{
+				tr = optr->pMaterial->Kt;
+			}
 		}
 	}
 
 	return tr;
 }
 
-float BBTree::Intersects(const glm::vec3& pos, const glm::vec3& dir, float tmax) {
-	float tmin = 0;
-	int count = 0;
+bool BBTree::Intersects(const glm::vec3& pos, const glm::vec3& dir, float tmax) {
+	bool result = false;
 
 	if (dir.x != 0.0) {
-		float tx = 0;
 		float tx1 = (this->center.x - this->absxyz.x - pos.x) / dir.x;
 		float tx2 = (this->center.x + this->absxyz.x - pos.x) / dir.x;
-		if (TMIN < tx1 && tx1 < tmax) {
-			tmin = tx1;
-			count = 1;
-			if (TMIN < tx2 && tx2 < tmax) {
-				if (tx2 < tmin)
-					tmin = tx2;
-				count = 2;
-			}
-		}
-		else if (TMIN < tx2 && tx2 < tmax) {
-			tmin = tx2;
-			count = 1;
-		}
+		result = (TMIN < tx1 && tx1 < tmax) || (TMIN < tx2 && tx2 < tmax);
 	}
 
-	if (count < 2 && dir.y != 0.0) {
-		float ty = 0;
+	if (!result && dir.y != 0.0) {
 		float ty1 = (this->center.y - this->absxyz.y - pos.y) / dir.y;
 		float ty2 = (this->center.y + this->absxyz.y - pos.y) / dir.y;
-		if (TMIN < ty1 && ty1 < tmax) {
-			if (ty1 != tmin)
-				count++;
-			if (ty1 < tmin)
-				tmin = ty1;
-			if (count < 2 && TMIN < ty2 && ty2 != tmin) {
-				count = 2;
-				if (ty2 < tmin)
-					tmin = ty2;
-			}
-		}
-		else if (TMIN < ty2 && ty2 < tmax && ty2 != tmin) {
-			count++;
-			if (ty2 < tmin)
-				ty = ty2;
-		}
+		result = (TMIN < ty1 && ty1 < tmax) || (TMIN < ty2 && ty2 < tmax);
 	}
 
-	if (count < 2 && dir.z != 0.0) {
-		float tz = 0;
+	if (!result && dir.z != 0.0) {
 		float tz1 = (this->center.z - this->absxyz.z - pos.z) / dir.z;
 		float tz2 = (this->center.z + this->absxyz.z - pos.z) / dir.z;
-		if (TMIN < tz1 && tz1 < tmax) {
-			if (tz1 != tmin)
-				count++;
-			if (tz1 < tmin)
-				tmin = tz1;
-			if (count < 2 && TMIN < tz2 && tz2 != tmin) {
-				count = 2;
-				if (tz2 < tmin)
-					tmin = tz2;
-			}
-		}
-		else if (TMIN < tz2 && tz2 < tmax && tz2 != tmin) {
-			count++;
-			if (tz2 < tmin)
-				tz = tz2;
-		}
+		result = (TMIN < tz1 && tz1 < tmax) || (TMIN < tz2 && tz2 < tmax);
 	}
 
-	return tmin;
+	return result;
 }
 
 /* This function takes last element as pivot, places

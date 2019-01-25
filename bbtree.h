@@ -62,7 +62,7 @@ private:
 	glm::vec3 absxyz = glm::vec3(0., 0., 0.);		// Max |x|, |y| and |z| of the boundingbox
 
 	void Sort(Object** objects, int size, int axis, glm::vec3 *min, glm::vec3 *max);
-	float Intersects(const glm::vec3& pos, const glm::vec3& dir, float tmax);
+	bool Intersects(const glm::vec3& pos, const glm::vec3& dir, float tmax);
 };
 
 /* Constructor */
