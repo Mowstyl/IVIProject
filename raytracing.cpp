@@ -139,14 +139,15 @@ void
 drawSpheres(void)
 {
   Object *optr;
+  ObjectList *olist = raytracer.world.objects.GetObjectList();
 
-  if (raytracer.world.objects.objects->Length() > 0) {
+  if (olist->Length() > 0) {
 
 	  /* Access and draw the objects in the list in sequence */
-	  optr = raytracer.world.objects.objects->First();
+	  optr = olist->First();
 	  while (optr != NULL) {
 		  optr->Draw();
-		  optr = raytracer.world.objects.objects->Next();
+		  optr = olist->Next();
 	  }
   }
 }
