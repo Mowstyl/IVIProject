@@ -350,32 +350,70 @@ BBTree::GetOpacity (const glm::vec3 &pos1,
 bool
 BBTree::Intersects (const glm::vec3 &pos,
 					const glm::vec3 &dir,
-					float tmax)
+					float tmaxarg)
 {
-	bool result = false;
+	float tmin,
+		  tmax,
+		  tymin,
+		  tymax,
+		  tzmin,
+		  tzmax;
+	float divx = 1.0f / dir.x;
+	float divy = 1.0f / dir.y;
+	float divz = 1.0f / dir.z;
 
-	if (dir.x != 0.0)
+	if (dir.x >= 0.0)
 		{
-			float tx1 = (this->center.x - this->absxyz.x - pos.x) / dir.x;
-			float tx2 = (this->center.x + this->absxyz.x - pos.x) / dir.x;
-			result = (TMIN < tx1 && tx1 < tmax) || (TMIN < tx2 && tx2 < tmax);
+			tmin = (this->center.x - this->absxyz.x - pos.x) * divx;
+			tmax = (this->center.x + this->absxyz.x - pos.x) * divx;
+		}
+	else
+		{
+			tmax = (this->center.x - this->absxyz.x - pos.x) * divx;
+			tmin = (this->center.x + this->absxyz.x - pos.x) * divx;
 		}
 
-	if (!result && dir.y != 0.0)
+	if (dir.y >= 0.0)
 		{
-			float ty1 = (this->center.y - this->absxyz.y - pos.y) / dir.y;
-			float ty2 = (this->center.y + this->absxyz.y - pos.y) / dir.y;
-			result = (TMIN < ty1 && ty1 < tmax) || (TMIN < ty2 && ty2 < tmax);
+			tymin = (this->center.y - this->absxyz.x - pos.y) * divy;
+			tymax = (this->center.y + this->absxyz.y - pos.y) * divy;
+		}
+	else
+		{
+			tymax = (this->center.y - this->absxyz.y - pos.y) * divy;
+			tymin = (this->center.y + this->absxyz.y - pos.y) * divy;
+		}
+	
+	if ((tmin > tymax) || (tymin > tmax))
+			return false;
+	
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax < tmax)
+		tmax = tymax;
+
+	if (dir.z >= 0.0)
+		{
+			tzmin = (this->center.z - this->absxyz.z - pos.z) * divz;
+			tzmax = (this->center.z + this->absxyz.z - pos.z) * divz;
+		}
+	else
+		{
+			tzmax = (this->center.z - this->absxyz.z - pos.z) * divz;
+			tzmin = (this->center.z + this->absxyz.z - pos.z) * divz;
 		}
 
-	if (!result && dir.z != 0.0)
-		{
-			float tz1 = (this->center.z - this->absxyz.z - pos.z) / dir.z;
-			float tz2 = (this->center.z + this->absxyz.z - pos.z) / dir.z;
-			result = (TMIN < tz1 && tz1 < tmax) || (TMIN < tz2 && tz2 < tmax);
-		}
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
 
-	return result;
+	if (tzmin > tmin)
+		tmin = tzmin;
+
+	if (tzmax < tmax)
+		tmax = tzmax;
+
+	return ((tmin < tmaxarg) && (tmax > TMIN));
 }
 
 /* This function takes last element as pivot, places
