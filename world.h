@@ -17,6 +17,7 @@
 #include "objectlist.h"
 #include "lightlist.h"
 #include "bbtree.h"
+#include "ray.h"
 
 
 /***************/
@@ -34,7 +35,7 @@ public:
 	void ClearStats();
 	
 	/* Key function in recursive ray tracing */
-	glm::vec3 Trace(const glm::vec3& pos, const glm::vec3& dir, int depth);
+	glm::vec3 Trace(const Ray &ray, int depth);
 	
 	int maxDepth;  // Limit of recursion
 	glm::vec3 bgcolor;  // Background color

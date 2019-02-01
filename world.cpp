@@ -12,6 +12,7 @@
 
 #include "world.h"
 #include "limits.h"
+#include "ray.h"
 
 
 /* Constructor */
@@ -33,14 +34,14 @@ void World::ClearStats() {
 }
 
 /* Key function in recursive ray tracing */
-glm::vec3 World::Trace(const glm::vec3& pos, const glm::vec3& dir, int depth) {
+glm::vec3 World::Trace(const Ray &ray, int depth) {
 
 	Object *nearObj = NULL;
 	float tnear, tmax;
 	tnear = tmax = TFAR;
 
 	/* Find nearest object in the direction of the ray */
-	nearObj = objects.NearestInt(pos, dir, tnear, tmax);
+	nearObj = objects.NearestInt(ray, tnear, tmax);
 
 	// If the ray intersects some object ...
 	if (nearObj != NULL) { 
@@ -48,8 +49,7 @@ glm::vec3 World::Trace(const glm::vec3& pos, const glm::vec3& dir, int depth) {
 		ShadingInfo shadInfo;
 		glm::vec3 color;
 
-		shadInfo.rayPos = pos;
-		shadInfo.rayDir = dir;
+		shadInfo.ray = ray;
 		shadInfo.t = tnear;
 		shadInfo.depth = depth;
 		shadInfo.pWorld = this;

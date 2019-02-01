@@ -16,6 +16,7 @@
 
 #include "object.h"
 #include "list.h"
+#include "ray.h"
 
 
 /********************/
@@ -28,10 +29,10 @@ public:
 
 	/* Returns the nearest object in the direction of the ray. Returns a pointer to that object and 
 	   the t value of the intersection point, otherwise returns NULL */
-	Object* NearestInt(const glm::vec3& pos, const glm::vec3& dir, float& tnear, float tmax);
+	Object* NearestInt(const Ray &ray, float& tnear, float tmax);
 
 	/* Returns the product of the opacities of the objects found in the direction of the ray */
-	glm::vec3 GetOpacity(const glm::vec3& pos1, const glm::vec3& pos2, const glm::vec3& dir);
+	glm::vec3 GetOpacity(const Ray &ray, const Ray &invray);
 
 	Object** AsArray(); // Returns the list as an array (pointer form)
 };

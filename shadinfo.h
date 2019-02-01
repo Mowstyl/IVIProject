@@ -12,6 +12,7 @@
 #ifndef _SHADINFO_H_
 #define _SHADINFO_H_
 
+#include "ray.h"
 #include "glm/vec3.hpp" // glm::vec3
 
 /*********************/
@@ -23,9 +24,7 @@ class World;  // Forward declaration
 class ShadingInfo {
 
 public:
-
-	glm::vec3 rayPos;  // Ray origin and ...
-	glm::vec3 rayDir;  // ... direction
+	Ray		  ray;	   // Ray
 	float t;           // Value of t at the intersection 
 	glm::vec3 point;   // Intersection point 
 	glm::vec3 normal;  // Normal to the surface at that point

@@ -36,9 +36,9 @@ class BBTree
 		~BBTree ();
 
 		/* Functions */
-		void        SetLeft       (BBTree          *pTree);  // Sets the left subtree
-		void        SetRight      (BBTree          *pTree);  // Sets the right subtree
-		void        SetElement    (Object          *pElem); // Sets the root element
+		void        SetLeft       (BBTree    *pTree);  // Sets the left subtree
+		void        SetRight      (BBTree    *pTree);  // Sets the right subtree
+		void        SetElement    (Object    *pElem); // Sets the root element
 		BBTree*     GetLeft       ();       // Returns the left subtree
 		BBTree*     GetRight      ();       // Returns the right subtree
 		Object*     GetElement    ();      // Returns the root element
@@ -46,14 +46,12 @@ class BBTree
 		ObjectList* GetObjectList ();
 		/* Returns the nearest object in the direction of the ray. Returns a pointer to that object and
 		the t value of the intersection point, otherwise returns NULL */
-		Object*     NearestInt    (const glm::vec3 &pos,
-							       const glm::vec3 &dir,
-							       float           &tnear,
-							       float            tmax);
+		Object*     NearestInt    (const Ray &ray,
+							       float     &tnear,
+							       float      tmax);
 		/* Returns the product of the opacities of the objects found in the direction of the ray */
-		glm::vec3   GetOpacity    (const glm::vec3 &pos1,
-							       const glm::vec3 &pos2,
-							       const glm::vec3 &dir);
+		glm::vec3   GetOpacity    (const Ray &ray,
+								   const Ray &invray);
 
 	private:
 		/* Attributes */
@@ -63,17 +61,16 @@ class BBTree
 			       *pRight;
 		int         maxLevel;
 		glm::vec3   center;		// Center coordinates
-		glm::vec3   absxyz;		// Max |x|, |y| and |z| of the boundingbox
+		glm::vec3   bounds[2];	// bounds is an array containing the minimum and maximum corner of the box
 
 		/* Functions */
-		void Sort       (Object          **objects,
-			             int               size,
-			             int               axis,
-			             glm::vec3        *min,
-			             glm::vec3        *max);
-		bool Intersects (const glm::vec3  &pos,
-			             const glm::vec3  &dir,
-			             float             tmax);
+		void Sort       (Object    **objects,
+			             int         size,
+			             int         axis,
+			             glm::vec3  *min,
+			             glm::vec3  *max);
+		bool Intersects (const Ray  &ray,
+			             float       tmaxarg);
 };
 
 #endif  // !defined _BBTREE_H_

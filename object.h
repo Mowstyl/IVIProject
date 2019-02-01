@@ -16,6 +16,7 @@
 
 #include "shadinfo.h"
 #include "material.h"
+#include "ray.h"
 
 
 /****************/
@@ -29,7 +30,7 @@ public:
   /* Computes the nearest intersection point between a ray and the object, 
      in the direction of the ray. Returns the t value of that point if it
      is positive, otherwise returns 0. */
-  virtual float NearestInt(const glm::vec3& pos, const glm::vec3& dir) = 0;
+  virtual float NearestInt(const Ray &ray) = 0;
 
   /* Returns the color of the object at the intersection point with the ray */
   virtual glm::vec3 Shade(ShadingInfo &shadInfo) = 0;
@@ -40,7 +41,8 @@ public:
   Material *pMaterial;
 
   glm::vec3 center;  // Center coordinates
-  glm::vec3 absxyz;  // BOUNDING BOXES FTW!!!
+  glm::vec3 bounds[2];  // bounds is an array containing the minimum and maximum corner of the box
+  // BOUNDING BOXES FTW!!! min in bounds[0], max in bounds[1]
 };
 
 
@@ -56,7 +58,7 @@ public:
   Sphere(const glm::vec3& Center, float Radius, Material *pMat);
 
   /* Inherited functions that are implemented in this class */
-  virtual float NearestInt(const glm::vec3& pos, const glm::vec3& dir);
+  virtual float NearestInt(const Ray &ray);
   virtual glm::vec3 Shade(ShadingInfo &shadInfo);
   virtual void Draw();
 

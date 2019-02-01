@@ -206,7 +206,7 @@ RayTracing(void)
 	  dir =  glm::normalize(dirN + dirU + dirV);  // Normalized direction
 
 	  /* Ray trace to compute color for this pixel */
-	  color = raytracer.world.Trace(raytracer.world.eye, dir, 1);
+	  color = raytracer.world.Trace(Ray(raytracer.world.eye, dir), 1);
 	  raytracer.frame.SetPixel(x, y, color);
 
 	  raytracer.world.numPrimRays++;

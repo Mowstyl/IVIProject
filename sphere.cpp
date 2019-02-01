@@ -20,12 +20,14 @@
 
 #include "object.h"
 #include "limits.h"
+#include "ray.h"
 
 
 /* Constructor */
 Sphere::Sphere(const glm::vec3& Center, float Radius, Material *pMat) {
   center = Center;
-  absxyz = glm::vec3(Radius, Radius, Radius);
+  bounds[0] = Center - glm::vec3(Radius, Radius, Radius);
+  bounds[1] = Center + glm::vec3(Radius, Radius, Radius);
   radius = Radius;
   pMaterial = pMat;
   pMaterial->IncRefs();
@@ -34,15 +36,15 @@ Sphere::Sphere(const glm::vec3& Center, float Radius, Material *pMat) {
 /* Computes the nearest intersection point between a ray and the sphere, 
    in the direction of the ray. Returns the t value of that point if it
    is positive, otherwise returns 0. */
-float Sphere::NearestInt(const glm::vec3& pos, const glm::vec3& dir)
+float Sphere::NearestInt(const Ray &ray)
 {
   glm::vec3 dif;
   float A, B, C, aux;
   float t1, t2;
 
-  A = glm::dot(dir, dir);
-  dif = pos - center;
-  B = 2.0f * glm::dot(dir, dif);
+  A = ray.innerdir;
+  dif = ray.pos - center;
+  B = 2.0f * glm::dot(ray.dir, dif);
   C = glm::dot(dif, dif) - radius*radius;
 
   aux = (B * B) - (4 * A * C);
@@ -74,7 +76,7 @@ glm::vec3 Sphere::Shade(ShadingInfo &shadInfo) {
 
 	glm::vec3 color;
 
-	shadInfo.point = shadInfo.rayPos + (shadInfo.t * shadInfo.rayDir);
+	shadInfo.point = shadInfo.ray.pos + (shadInfo.t * shadInfo.ray.dir);
 	shadInfo.normal = glm::normalize(shadInfo.point - center);  // 1-unit-long normal
 
 	/* If the viewer is staring at an interior or back face, we will only illuminate it if

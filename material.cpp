@@ -69,7 +69,7 @@ glm::vec3 Material::Shade(ShadingInfo &shadInfo)
 	float VdotN, ratio;
 	bool isTrans;
 
-	V = -shadInfo.rayDir;
+	V = -shadInfo.ray.dir;
 	VdotN = glm::dot(V, shadInfo.normal);
 	isTrans = (Kt.x > 0. || Kt.y > 0. || Kt.z > 0.);
 	if (VdotN < 0) {
@@ -103,7 +103,7 @@ glm::vec3 Material::Shade(ShadingInfo &shadInfo)
 		glm::vec3 L = glm::normalize(clight->position - shadInfo.point);
 
 		shadInfo.pWorld->numShadRays++;
-		glm::vec3 tr = shadInfo.pWorld->objects.GetOpacity(shadInfo.point, clight->position, L);
+		glm::vec3 tr = shadInfo.pWorld->objects.GetOpacity(Ray(shadInfo.point, L), Ray(clight->position, -L));
 
 		float LdotN = glm::dot(L, shadInfo.normal);
 
@@ -135,7 +135,7 @@ glm::vec3 Material::Shade(ShadingInfo &shadInfo)
 			shadInfo.pWorld->numReflRays++;
 			glm::vec3 R = glm::normalize(2 * VdotN * shadInfo.normal - V);
 
-			color += shadInfo.pWorld->Trace(shadInfo.point, R, shadInfo.depth + 1) * Kr;
+			color += shadInfo.pWorld->Trace(Ray(shadInfo.point, R), shadInfo.depth + 1) * Kr;
 		}
 
 		if (isTrans) // El objeto es translucido
@@ -144,7 +144,7 @@ glm::vec3 Material::Shade(ShadingInfo &shadInfo)
 
 			if (pSnell != NULL) {
 				shadInfo.pWorld->numRefrRays++;
-				color += shadInfo.pWorld->Trace(shadInfo.point, *pSnell, shadInfo.depth + 1) * Kt;
+				color += shadInfo.pWorld->Trace(Ray(shadInfo.point, *pSnell), shadInfo.depth + 1) * Kt;
 			}
 		}
 	}
