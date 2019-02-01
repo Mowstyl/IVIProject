@@ -274,19 +274,12 @@ BBTree::NearestInt (const Ray &ray,
 
 					aux = this->pLeft->NearestInt (ray, tl, auxtnear);
 
-					if (tr > TMIN && tr < tmax)
+					if (nearObj != NULL)
 						{
-							if (tl > TMIN && tl < tmax)
+							if (aux != NULL)
 								{
-									if (tr < tl)
-										{
-											tnear = tr;
-										}
-									else
-										{
-											tnear = tl;
-											nearObj = aux;
-										}
+									tnear = tl;
+									nearObj = aux;
 								}
 							else
 								{
@@ -295,16 +288,8 @@ BBTree::NearestInt (const Ray &ray,
 						}
 					else
 						{
-							if (tl > TMIN && tl < tmax)
-								{
-									tnear = tl;
-									nearObj = aux;
-								}
-							else
-								{
-									tnear = 0;
-									nearObj = NULL;
-								}
+							tnear = tl;
+							nearObj = aux;
 						}
 				}
 			else
