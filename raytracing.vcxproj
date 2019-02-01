@@ -105,7 +105,6 @@
     <ClInclude Include="matrices.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="objectlist.h" />
-    <ClInclude Include="objeto3d.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="raytracer.h" />
     <ClInclude Include="shadinfo.h" />

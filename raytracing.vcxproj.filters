@@ -79,9 +79,6 @@
     <ClInclude Include="objectlist.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="objeto3d.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="raytracer.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
